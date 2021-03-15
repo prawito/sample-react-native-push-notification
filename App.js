@@ -3,112 +3,197 @@
  * https://github.com/facebook/react-native
  *
  * @format
- * @flow strict-local
+ * @flow
  */
 
-import React from 'react';
+import React, {Component} from 'react';
 import {
-  SafeAreaView,
+  TextInput,
   StyleSheet,
-  ScrollView,
-  View,
   Text,
-  StatusBar,
+  View,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
+import NotifService from './NotifService';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+export default class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
 
-const App: () => React$Node = () => {
-  return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
-  );
-};
+    this.notif = new NotifService(
+      this.onRegister.bind(this),
+      this.onNotif.bind(this),
+    );
+  }
+
+  render() {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>
+          Example app react-native-push-notification
+        </Text>
+        <View style={styles.spacer}></View>
+        <TextInput
+          style={styles.textField}
+          value={this.state.registerToken}
+          placeholder="Register token"
+        />
+        <View style={styles.spacer}></View>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.localNotif();
+          }}>
+          <Text>Local Notification (now)</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.localNotif('sample.mp3');
+          }}>
+          <Text>Local Notification with sound (now)</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.scheduleNotif();
+          }}>
+          <Text>Schedule Notification in 30s</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.scheduleNotif('sample.mp3');
+          }}>
+          <Text>Schedule Notification with sound in 30s</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.cancelNotif();
+          }}>
+          <Text>Cancel last notification (if any)</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.cancelAll();
+          }}>
+          <Text>Cancel all notifications</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.checkPermission(this.handlePerm.bind(this));
+          }}>
+          <Text>Check Permission</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.requestPermissions();
+          }}>
+          <Text>Request Permissions</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.abandonPermissions();
+          }}>
+          <Text>Abandon Permissions</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.getScheduledLocalNotifications((notifs) =>
+              console.log(notifs),
+            );
+          }}>
+          <Text>Console.Log Scheduled Local Notifications</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.getDeliveredNotifications((notifs) =>
+              console.log(notifs),
+            );
+          }}>
+          <Text>Console.Log Delivered Notifications</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.createOrUpdateChannel();
+          }}>
+          <Text>Create or update a channel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            this.notif.popInitialNotification();
+          }}>
+          <Text>popInitialNotification</Text>
+        </TouchableOpacity>
+
+        <View style={styles.spacer}></View>
+
+        {this.state.fcmRegistered && <Text>FCM Configured !</Text>}
+
+        <View style={styles.spacer}></View>
+      </View>
+    );
+  }
+
+  onRegister(token) {
+    this.setState({registerToken: token.token, fcmRegistered: true});
+  }
+
+  onNotif(notif) {
+    Alert.alert(notif.title, notif.message);
+  }
+
+  handlePerm(perms) {
+    Alert.alert('Permissions', JSON.stringify(perms));
+  }
+}
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF',
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
+  welcome: {
+    fontSize: 20,
+    textAlign: 'center',
+    margin: 10,
   },
-  body: {
-    backgroundColor: Colors.white,
+  button: {
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 5,
+    padding: 5,
+    width: '70%',
+    backgroundColor: '#DDDDDD',
+    borderRadius: 5,
   },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  textField: {
+    borderWidth: 1,
+    borderColor: '#AAAAAA',
+    margin: 5,
+    padding: 5,
+    width: '70%',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
+  spacer: {
+    height: 10,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
+  title: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    textAlign: 'center',
   },
 });
-
-export default App;
