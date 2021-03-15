@@ -78,10 +78,13 @@ export default class NotifService {
       channelId: soundName ? 'sound-channel-id' : 'default-channel-id',
       ticker: 'My Notification Ticker', // (optional)
       autoCancel: true, // (optional) default: true
-      largeIcon: 'ic_launcher', // (optional) default: "ic_launcher"
+      largeIcon: 'ic_notification_large', // (optional) default: "ic_launcher"
       smallIcon: 'ic_notification', // (optional) default: "ic_notification" with fallback for "ic_launcher"
       bigText: 'My big text that will be shown when notification is expanded', // (optional) default: "message" prop
       subText: 'This is a subText', // (optional) default: none
+      largeIconUrl: 'https://source.unsplash.com/random/1024x500',
+      bigLargeIconUrl: 'https://source.unsplash.com/random/1024x500',
+      bigPictureUrl: 'https://source.unsplash.com/random/1024x500',
       color: 'red', // (optional) default: system default
       vibrate: true, // (optional) default: true
       vibration: 300, // vibration length in milliseconds, ignored if vibrate=false, default: 1000
